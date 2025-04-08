@@ -1,40 +1,45 @@
-const express = require('express');
+const express = require("express");
+const cors = require("cors"); // ✅ Add this line
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); // Parse JSON input
+app.use(cors()); // ✅ Use CORS middleware
+app.use(express.json());
 
-// GET route to verify the server is up
-app.get('/bfhl', (req, res) => {
+app.get("/", (req, res) => {
   res.json({ operation_code: 1 });
 });
 
-// POST route to process data
-app.post('/bfhl', (req, res) => {
+app.post("/bfhl", (req, res) => {
   const { data } = req.body;
+  const numbers = [];
+  const alphabets = [];
 
-  if (!Array.isArray(data)) {
-    return res.status(400).json({ error: 'Invalid input format. Expected an array.' });
+  for (let item of data) {
+    if (!isNaN(item)) {
+      numbers.push(item);
+    } else if (isNaN(item)) {
+      alphabets.push(item);
+    }
   }
 
-  const numbers = data.filter(item => !isNaN(item));
-  const alphabets = data.filter(item => /^[a-zA-Z]$/.test(item));
-  const highest = alphabets.sort((a, b) =>
-    b.toLowerCase().charCodeAt(0) - a.toLowerCase().charCodeAt(0)
-  )[0];
+  const highest = alphabets
+    .filter((ch) => ch === ch.toLowerCase())
+    .sort()
+    .slice(-1);
 
   res.json({
     is_success: true,
-    user_id: "prachi_mittal30",  
-    email: "22bcs15935@cuchd.in", 
-    roll_number: "22BCS15935",  
+    user_id: "prachi_mittal30",
+    email: "22bcs15935@cuchd.in",
+    roll_number: "22BCS15935",
     numbers,
     alphabets,
-    highest_alphabet: highest ? [highest] : []
+    highest_alphabet: highest,
   });
 });
 
-// Start server
-const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
